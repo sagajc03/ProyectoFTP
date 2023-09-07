@@ -39,20 +39,7 @@ public class ServidorHilo extends Thread{
                         manejarPUT();
                         break;
                     case "cd" :
-                        //Pregunta por un archivo
-                        out.writeUTF("Directorio a entrar (\"..\" a raiz)> ");
-                        String directorio = in.readUTF();
-                        f = new File(this.path + "\\" + directorio);
-                        if(f.exists()) {
-                            if (directorio.equals("..")) {
-                                this.path = PATH;
-                            } else {
-                                this.path = path + "\\" + directorio;
-                            }
-                            out.writeUTF("Cambio de directorio realizado");
-                        } else{
-                            out.writeUTF("No se encontro el directorio");
-                        }
+                        manejarCD();
                         break;
                     default:
                         out.writeUTF("Escriba un comando valido");
@@ -150,7 +137,7 @@ public class ServidorHilo extends Thread{
         out.writeUTF("Escribe el numbre del fichero> ");
         String archivo = in.readUTF();
         File f = new File(path+"\\"+archivo);
-        if(f.exists()) {
+        if(f.exists() && !f.isDirectory()) {
             out.writeBoolean(true);
             byte[] contenidoFichero = convertirFileABytes(f);
             out.writeInt(contenidoFichero.length);
@@ -159,7 +146,24 @@ public class ServidorHilo extends Thread{
             }
         } else {
             out.writeBoolean(false);
-            System.out.println("No existe el archivo");
+            System.out.println("No existe el archivo o es una carpeta");
+        }
+    }
+
+    private void manejarCD() throws IOException {
+        //Pregunta por un archivo
+        out.writeUTF("Directorio a entrar (\"..\" a raiz)> ");
+        String directorio = in.readUTF();
+        File f = new File(this.path + "\\" + directorio);
+        if(f.exists() && f.isDirectory()) {
+            if (directorio.equals("..")) {
+                this.path = PATH;
+            } else {
+                this.path = path + "\\" + directorio;
+            }
+            out.writeUTF("Cambio de directorio realizado");
+        } else{
+            out.writeUTF("No se encontro el directorio");
         }
     }
 }

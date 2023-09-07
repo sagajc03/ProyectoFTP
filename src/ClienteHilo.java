@@ -22,7 +22,7 @@ public class ClienteHilo extends Thread{
         boolean salir = false;
         try {
             while (!salir) {
-                System.out.print("LS, PUT, GET, SAlIR\nFTP> ");
+                System.out.print("LS, PUT, GET, CD, SAlIR\nFTP> ");
                 instruccion = sn.next();
                 out.writeUTF(instruccion);
                 switch (instruccion.toLowerCase()) {
@@ -38,16 +38,17 @@ public class ClienteHilo extends Thread{
                         //envia un archivo al servidor
                         manejarPUT(sn);
                         break;
-                    case "salir":
-                        System.out.println("SAliendo");
-                        salir=true;
+
                     case "cd":
                         mensaje = in.readUTF();
                         System.out.println(mensaje);
                         String directorio = sn.next();
                         out.writeUTF(directorio);
                         System.out.println(in.readUTF());
-
+                        break;
+                    case "salir":
+                        System.out.println("Saliendo");
+                        salir=true;
                         break;
                     default:
                         mensaje = in.readUTF();
@@ -89,7 +90,7 @@ public class ClienteHilo extends Thread{
         out.writeUTF(archivo);
         File f = new File(path+"\\"+archivo);
         boolean existe;
-        if (f.exists()) {
+        if (f.exists() && !f.isDirectory()) {
             out.writeBoolean(true);
             byte[] contenidoFichero = convertirFileABytes(f);
             out.writeInt(contenidoFichero.length);
@@ -98,7 +99,7 @@ public class ClienteHilo extends Thread{
             }
         }else{
             out.writeBoolean(false);
-            System.out.println("No existe el archivo");
+            System.out.println("No existe el archivo o es una carpeta");
         }
     }
 
@@ -125,6 +126,14 @@ public class ClienteHilo extends Thread{
         } else{
             System.out.println("El archivo no existe");
         }
+    }
+
+    private void manejarCD(Scanner sn) throws IOException {
+        String mensaje = in.readUTF();
+        System.out.println(mensaje);
+        String directorio = sn.next();
+        out.writeUTF(directorio);
+        System.out.println(in.readUTF());
     }
 }
 
